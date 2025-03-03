@@ -77,8 +77,24 @@
 		</div>
 
 		<h3>Part 2: Bezier surfaces with separable 1D de Casteljau</h3>
-		TODO: Briefly explain how de Casteljau algorithm extends to Bezier surfaces and how you implemented it in order to evaluate Bezier surfaces.
+		De Casteljau algorithm can be extended to Bezier surfaces by evaluating on individual Bezier curves parameterized by u, and then 
+		evaluating these points on another curve, parameterized by v. The diagram below provides a clear visualization of this process: de 
+		Casteljau is first used to evaluate u on each of the Bezier curves, which then act as control points for the "moving" Bezier curve.
+		From here, we can simply perform de Casteljau one more time on this new curve to evaluate the final point at the parameter v, which lies on the 
+		Bezier surface with the parameters u and v. 
 
+		<figure>
+			<img src="p2-diagram.png" alt="Part 2 Bezier surface diagram" style="width:60%"/>
+			<figcaption>Bezier Surface with Separable 1D de Casteljau diagram</figcaption>
+		</figure>
+		<br>
+		For this part, we implemented 3 functions: <code>evaluateStep</code>, <code>evaluate1D</code>, and <code>evaluate</code>:
+		<br>
+		<ol>
+			<li><code>evaluateStep</code>: This function evaluates one step of de Casteljau's algorithm using the given points and the scalar parameter t. To implement this, for every point except the last one, we calculated <code>(1 - t) * points[i] + t * points[i + 1]</code> and stored the values in a <code>Vector3D</code>.</li>
+			<li><code>evaluate1D</code>: This function fully evaluates de Casteljau's algorithm and uses the same parameters as <code>evaluateStep</code>. We implemented this function by recursively calling <code>evaluateStep</code> on the current control points until we ended up with only one. Each call to <code>evaluateStep</code> would decrease the number of points by 1. </li>
+			<li><code>evaluate</code>: This function evaluates the Bezier patch at parameter (u, v). To implement this function, we first called <code>evaluate1D</code> on all the control points with the parameter u. Then, we stored all these points in a <code>Vector3D</code> and called <code>evaluate1D</code> one more time on this vector, parameterized by v. This yields a final point that lies on the Bezier surface, defined by the n x n points at the parameters u and v. </li>
+		</ol>
 		<figure>
 			<img src="p2-teapot.png" alt="Part 2 Teapot" style="width:60%"/>
 			<figcaption><code>bez/teapot.bez</code> evaluated by Bezier Surface with Separable 1D de Casteljau implementation</figcaption>
@@ -91,9 +107,10 @@
 
 		<h3>Part 4: Edge flip</h3>
 		To implement the edge flip operation, we first visualized the mesh before and after a flip, labeling every half-edge, vertex, edge, and face, 
-		as shown in the diagram below. Then, we reassigned the halfedge pointer for every vertex, edge, and face. After this, we used the 
+		as shown in the diagram below. In our implementation, we rotated all the half-edges that were on the inside (h0, h1, h2, h5, h6, h7) 90 degrees 
+		clockwise to flip the desired edge e0. In the <code>flipEdge</code> method, we first reassigned the halfedge pointer for every vertex, edge, and face. After this, we used the 
 		<code>Halfedge::setNeighbors</code> method to reassign the correct next, twin, vertex, edge, and face pointers for every half-edge. As 
-		recommended, we setting the pointers of all the elements in the mesh even if they did not change for clarity and ease when implementing and 
+		recommended, we set the pointers of all the elements in the mesh even if they did not change for clarity and ease when implementing and 
 		debugging. Initially, it was difficult understanding which pointers to reassign, but after clearly drawing out all elements before and after 
 		modification, we were able to implement the edge flip operation pretty smoothly.  
 
