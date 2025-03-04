@@ -103,7 +103,30 @@
 		<h2>Section II: Triangle Meshes and Half-Edge Data Structure</h2>
 
 		<h3>Part 3: Area-weighted vertex normals</h3>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		To get the area-weighted vertex normal for a given vertex <code>v</code>, we must 1) iterate through all the faces that this vertex is a part of, 2) find the normals of each of those faces, and 3) weight these normals by area of corresponding faces, before we finally 4) add it up and normalize to get the final result.
+		<ul>
+			<li>To iterate through each face, we started at a half edge <code>h</code> , which was <code>v</code>’s halfedge, and kept setting it to <code> h->twin()->next() </code> until we reached the starting halfedge. What this accomplished was reaching every single halfedge (and thus face) that had v as part of its triangle. 
+			</li>
+			<li>The next step was to find the normals which we calculated by getting vectors representing 2 edges (by using positions of all 3 vertices of the triangle), and taking their cross product. Then, we got the unit normal by normalizing this cross product. </li>
+			<li>To weight the unit normal by area, simply use the fact that area of a triangle can be computed from ½(AxB) where A and B are two edges. Thus the area is just ½ * (cross product of the 2 edges from earlier). And thus the weighted unit normal was  ½ * (cross product of the 2 edges) * unit normal.</li>
+			<li>Finally, we just summed up all the weighted unit normals per face into one vector. When we were done, we returned the normalized version of this final vector.</li>
+		  </ul>
+
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="hw4q3-1.jpeg" width="400px"/>
+				  <figcaption>Shading Without Vertex Normals (Default Flat Shading)</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="hw4q3-2.jpeg" width="400px"/>
+				  <figcaption>Shading With Vertex Normals (Phong Shading)</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
+
 
 		<h3>Part 4: Edge flip</h3>
 		To implement the edge flip operation, we first visualized the mesh before and after a flip, labeling every half-edge, vertex, edge, and face, 
@@ -160,7 +183,43 @@
 		</div>
 
 		<h3>Part 5: Edge split</h3>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+		To implement the edge split operation, we generalized how the edge split would change all the halfedges, vertices, faces, and edges of two arbitrary triangles. We listed out all the relations between features both before and after the split, and
+		we were confident that we could replicate these changes in code.
+
+		As for the function <code>splitEdge</code>, this is the general process we followed: First, we wanted to have references for every single preexisting feature, so we had <code>Iter</code> elements for every single
+		vertex, edge, face, and halfedge. By traversing through the halfedges of each triangle, we were able to get all this information.
+
+		Then, we allocated space for the new halfedges, vertex, edges, and faces using the provided methods, such as <code> newVertex() </code>. After allocating this space, we then just reassigned pointers according to the list we made from earlier.
+		It was important to reassign these pointers for every single vertex/edge/face/halfedge, not just the newly added ones. Finally, we updated the position of the new vertex by calculating the midpoint of the given edge.
+
+		As for the debugging journey, one tiny mistake took a bit of time to catch, which wa caused by mislabelling one of the halfedge's <code> next() </code> pointer to go to the wrong halfedge. This caused one whole face to not render properly in the <code>cube.dae</code> file.
+		However, we found this error by printing out the addresses of each face, and comparing the addresses using the inspector tool in the GUI. That way, we could see which face was causing the error. Then by comparing every vector/edge/halfedge related to the erroneous face, and double checking our diagram, we caught our one character mistake.
+	 
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="hw4q3-1.jpeg" width="400px"/>
+				  <figcaption>Mesh Before Edge Splits</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="hw4q3-2.jpeg" width="400px"/>
+				  <figcaption>Mesh After Edge Splits</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="hw4q3-1.jpeg" width="400px"/>
+				  <figcaption>Mesh Before Combo of Edge Splits + Edge Flips</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="hw4q3-2.jpeg" width="400px"/>
+				  <figcaption>Mesh After Combo of Edge Splits + Edge Flips</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
 
 		<h3>Part 6: Loop subdivision for mesh upsampling</h3>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
