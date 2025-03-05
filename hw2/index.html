@@ -48,9 +48,66 @@
 		<h2>Section I: Bezier Curves and Surfaces</h2>
 
 		<h3>Part 1: Bezier curves with 1D de Casteljau subdivision</h3>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		
+		<p>
+			De Casteljau is an algorithm that takes a set of <code>n</code> control points and some value t (where t is in [0, 1]) and performs linear interpolations between successive control points. This results in the number of control points being
+			reduced by 1 in size. If you recurse on this process, you eventually are left with this one final point, which has contribution between all of the original <code>n</code> control points. However, what is special about this point
+			is it is directly on the Bezier curve! If you take all the corresponding points from varying t from 0 to 1, you'll end up tracing what is the Bezier curve.	
+		</p>
+		<p>
+			In part 1, we were responsible for evaluating one step of the De Casteljau as described as above in order to create a Bezier curve. And much like above, to implement <code>evaluateStep</code>, we took linear interpolations of successive points,
+			where new points were of form (1-t)*((i - 1)st point) + t*(ith point), granted everything is well-formed. Of course, for the algorithm to fully produce a Bezier curve, this method,  <code>evaluateStep</code>, should be ran until there is only one point left.
+		</p>
+		
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="p1-1.png" width="400px"/>
+				  <figcaption>Start: All 6 control points</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="p1-2.png" width="400px"/>
+				  <figcaption>After 1 iteration of de Casteljau</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+					<img src="p1-3.png" width="400px"/>
+					<figcaption>After 2 iterations of de Casteljau</figcaption>
+				</td>
+				<td style="text-align: center;">
+					<img src="p1-4.png" width="400px"/>
+					<figcaption>After 3 iteration of de Casteljau</figcaption>
+				  </td>
+				</tr>
+				<tr>
+				  <td style="text-align: center;">
+					  <img src="p1-5.png" width="400px"/>
+					  <figcaption>After 4 iterations of de Casteljau</figcaption>
+				  </td>
 
-		<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
+				  <td style="text-align: center;">
+					<img src="p1-6.png" width="400px"/>
+					<figcaption>Final iteration / After 5 iterations of de Casteljau</figcaption>
+				  </td>
+				</tr>
+				<tr>
+				  <td style="text-align: center;">
+					  <img src="p1-7.png" width="400px"/>
+					  <figcaption>Fully run de Casteljau + Resultant Bezier Curve</figcaption>
+				  </td>
+				  <td style="text-align: center;">
+					<img src="p1-8.png" width="400px"/>
+					<figcaption>Bezier Curve from Original Set of Control Points Except A few are Moved + Different T</figcaption>
+				</td>
+			</tr>
+			</table>
+		</div>
+
+
+	<!-- 
+			Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
 		<div style="display: flex; flex-direction: column; align-items: center;">
 			<table style="width: 100%; text-align: center; border-collapse: collapse;">
 			  <tr>
@@ -74,7 +131,7 @@
 				</td>
 			  </tr>
 			</table>
-		</div>
+		</div> -->
 
 		<h3>Part 2: Bezier surfaces with separable 1D de Casteljau</h3>
 		De Casteljau algorithm can be extended to Bezier surfaces by evaluating on individual Bezier curves parameterized by u, and then 
@@ -116,12 +173,12 @@
 			<table style="width: 100%; text-align: center; border-collapse: collapse;">
 			  <tr>
 				<td style="text-align: center;">
-				  <img src="hw4q3-1.jpeg" width="400px"/>
-				  <figcaption>Shading Without Vertex Normals (Default Flat Shading)</figcaption>
+				  <img src="p3-1.png" width="400px"/>
+				  <figcaption>Shading Without Vertex Normals</figcaption>
 				</td>
 				<td style="text-align: center;">
-				  <img src="hw4q3-2.jpeg" width="400px"/>
-				  <figcaption>Shading With Vertex Normals (Phong Shading)</figcaption>
+				  <img src="p3-2.png" width="400px"/>
+				  <figcaption>Shading With Vertex Normals</figcaption>
 				</td>
 			  </tr>
 			</table>
@@ -142,7 +199,6 @@
 			<img src="p4-diagram.jpeg" alt="Part 4 Diagram" style="width:80%"/>
 			<figcaption>Mesh with labeled elements before and after edge flip</figcaption>
 		</figure>
-
 		<br>
 
 		<div style="display: flex; flex-direction: column; align-items: center;">
@@ -184,37 +240,46 @@
 
 		<h3>Part 5: Edge split</h3>
 
-		To implement the edge split operation, we generalized how the edge split would change all the halfedges, vertices, faces, and edges of two arbitrary triangles. We listed out all the relations between features both before and after the split, and
-		we were confident that we could replicate these changes in code.
+		<p>
+			To implement the edge split operation, we generalized how the edge split would change all the halfedges, vertices, faces, and edges of two arbitrary triangles. We listed out all the relations between features both before and after the split, and
+			we were confident that we could replicate these changes in code. <br>
+			As for the function <code>splitEdge</code>, this is the general process we followed: First, we wanted to have references for every single preexisting feature, so we had <code>Iter</code> elements for every single
+			vertex, edge, face, and halfedge. By traversing through the halfedges of each triangle, we were able to get all this information. <br>
+			Then, we allocated space for the new halfedges, vertex, edges, and faces using the provided methods, such as <code> newVertex() </code>. After allocating this space, we then just reassigned pointers according to the list we made from earlier.
+			It was important to reassign these pointers for every single vertex/edge/face/halfedge, not just the newly added ones. Finally, we updated the position of the new vertex by calculating the midpoint of the given edge.
+		</p>
 
-		As for the function <code>splitEdge</code>, this is the general process we followed: First, we wanted to have references for every single preexisting feature, so we had <code>Iter</code> elements for every single
-		vertex, edge, face, and halfedge. By traversing through the halfedges of each triangle, we were able to get all this information.
+		</p>
+			As for the debugging journey, one tiny mistake took a bit of time to catch, which wa caused by mislabelling one of the halfedge's <code> next() </code> pointer to go to the wrong halfedge. This caused one whole face to not render properly in the <code>cube.dae</code> file.
+			However, we found this error by printing out the addresses of each face, and comparing the addresses using the inspector tool in the GUI. That way, we could see which face was causing the error. Then by comparing every vector/edge/halfedge related to the erroneous face, and double checking our diagram, we caught our one character mistake.
+		</p>
+		
+		<br>
+		<figure>
+			<img src="p5-diagram.jpeg" alt="Part 5 Diagram" style="width:80%"/>
+			<figcaption>Mesh with labeled elements before and after edge split</figcaption>
+		</figure>
+		<br>
 
-		Then, we allocated space for the new halfedges, vertex, edges, and faces using the provided methods, such as <code> newVertex() </code>. After allocating this space, we then just reassigned pointers according to the list we made from earlier.
-		It was important to reassign these pointers for every single vertex/edge/face/halfedge, not just the newly added ones. Finally, we updated the position of the new vertex by calculating the midpoint of the given edge.
-
-		As for the debugging journey, one tiny mistake took a bit of time to catch, which wa caused by mislabelling one of the halfedge's <code> next() </code> pointer to go to the wrong halfedge. This caused one whole face to not render properly in the <code>cube.dae</code> file.
-		However, we found this error by printing out the addresses of each face, and comparing the addresses using the inspector tool in the GUI. That way, we could see which face was causing the error. Then by comparing every vector/edge/halfedge related to the erroneous face, and double checking our diagram, we caught our one character mistake.
-	 
 		<div style="display: flex; flex-direction: column; align-items: center;">
 			<table style="width: 100%; text-align: center; border-collapse: collapse;">
 			  <tr>
 				<td style="text-align: center;">
-				  <img src="hw4q3-1.jpeg" width="400px"/>
+				  <img src="p5-before.png" width="400px"/>
 				  <figcaption>Mesh Before Edge Splits</figcaption>
 				</td>
 				<td style="text-align: center;">
-				  <img src="hw4q3-2.jpeg" width="400px"/>
+				  <img src="p5-after-split.png" width="400px"/>
 				  <figcaption>Mesh After Edge Splits</figcaption>
 				</td>
 			  </tr>
 			  <tr>
 				<td style="text-align: center;">
-				  <img src="hw4q3-1.jpeg" width="400px"/>
+				  <img src="p5-before.png" width="400px"/>
 				  <figcaption>Mesh Before Combo of Edge Splits + Edge Flips</figcaption>
 				</td>
 				<td style="text-align: center;">
-				  <img src="hw4q3-2.jpeg" width="400px"/>
+				  <img src="p5-after-split-flip.png" width="400px"/>
 				  <figcaption>Mesh After Combo of Edge Splits + Edge Flips</figcaption>
 				</td>
 			  </tr>
