@@ -43,7 +43,9 @@
 		-->
 
 		<h2>Overview</h2>
-		TODO: Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.
+		In this homework, we explored Bezier curves/surfaces, mesh representations, and geometry processing. We learned how shapes can be modelled 
+		and modified with meshes (e.g. smoothing with loop subdivision) and especially how powerful triangle meshes can be, even in building very complex and detailed 
+		models. 
 
 		<h2>Section I: Bezier Curves and Surfaces</h2>
 
@@ -173,12 +175,21 @@
 			<table style="width: 100%; text-align: center; border-collapse: collapse;">
 			  <tr>
 				<td style="text-align: center;">
+<<<<<<< HEAD
 				  <img src="p3-1.png" width="400px"/>
 				  <figcaption>Shading Without Vertex Normals</figcaption>
 				</td>
 				<td style="text-align: center;">
 				  <img src="p3-2.png" width="400px"/>
 				  <figcaption>Shading With Vertex Normals</figcaption>
+=======
+				  <img src="hw4q3-1.png" width="400px"/>
+				  <figcaption>Shading Without Vertex Normals (Default Flat Shading)</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="hw4q3-2.png" width="400px"/>
+				  <figcaption>Shading With Vertex Normals (Phong Shading)</figcaption>
+>>>>>>> 20f887ce5a82376d7f7d51b22f3f14533661fd6c
 				</td>
 			  </tr>
 			</table>
@@ -287,21 +298,132 @@
 		</div>
 
 		<h3>Part 6: Loop subdivision for mesh upsampling</h3>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		In our implementation of loop subdivision, we split the process into 5 steps:
+		<br>
+		<ol>
+			<li>First, we created a helper method <code>updateOldVertex</code>, which computed new positions for all the vertices in 
+				the input mesh using the loop subdivision rule: <br><br>(1 - \(n\) * \(u\)) * original_position + \(u\) * original_neighbor_position_sum
+				<br><br>In this equation, \(n\) is the degree of the vertex, \(u\) is \(3/16\) if \(n = 3\) and \(3/8n\) otherwise. original_position is 
+				the position of the current vertex, and original_neighbor_position_sum is the sum of all the positions of that vertex's neighbors. For each
+				 vertex v, we set <code>v->newPosition</code> to this computed value. In this step, we also set <code>v->isNew</code> for these vertices to be false. </li>
+			<li>Then, we created another helper method <code>updateNewVertex</code>, which computed the updated vertex positions associated with 
+				edges in the mesh and stored them in <code>e->newPosition</code> for each edge e. For a pair of triangles with vertices A, B, C, and D, 
+				where the new vertex is splitting the shared edge (A, B), the newPosition is calculated as 3/8 * (A + B) + 1/8 * (C + D), where A, B, C, and D 
+				are the positions of the vertices. We also set <code>e->isNew</code> to false for each of these edges. </li>
+			<li>In the next step, we split every edge in the mesh. For every edge, we called <code>edgeSplit</code> from the previous task, which would 
+				return a <code>VertexIter</code>, which we called <code>newSplitVertex</code>. We set <code>newSplitVertex->isNew</code> to true and also 
+				assigned <code>newPosition</code> to the original edge's <code>newPosition</code>. We then traversed through the half-edges of the 
+				triangle pair that has been split, assigning the <code>isNew</code> attribute accordingly. The diagram below is a more detailed visualization 
+				of this traversal. 
+				<figure>
+					<img src="p6-diagram.jpeg" alt="Part 6 Diagram" style="width:30%"/>
+					<figcaption>visualization of step 3 isNew assignments</figcaption>
+				</figure></li>
+			<li>Then, we flipped any new edges that connected an old and new vertex using the <code>edgeFlip</code> method from part 4 from above. We iterated through 
+				all the mesh edges and checked if the corresponding vertices A and B were true/false or false/true. If so, we flipped the edge. </li>
+			<li>Finally, in the last step, we updated all the vertex positions by assigning <code>v->position = v->newPosition</code> for every vertex in the mesh, as 
+				we had calculated all the newPositions in steps 1 and 2. </li>
+			<br>
+			
+		</ol>
 
-		<h2>(Optional) Section III: Potential Extra Credit - Art Competition: Model something Creative</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		When implementing, we were initially having difficulty with all the different calculations, but when following the recommendations to break the task
+		 into smaller parts and calculating all the vertex positions before performing any edge flips and splits, as well as drawing out diagrams, helped us 
+		 more easily implement the loop subdivision method. 
 
-		<h2>Additional Notes (please remove)</h2>
-		<ul>
-			<li>You can also add code if you'd like as so: <code>code code code</code></li>
-			<li>If you'd like to add math equations, 
-				<ul>
-					<li>You can write inline equations like so: \( a^2 + b^2 = c^2 \)</li>
-					<li>You can write display equations like so: \[ a^2 + b^2 = c^2 \]</li>
-				</ul>
-			</li>
-		</ul>
+		<br><br>
+		Here, we have an example of a teapot mesh that has undergone loop subdivision. The more we upsample, the smoother corners and edges become, as we can see 
+		in the subsequent photos below. However, with sharp features, they may slightly lose their original shape, as they become smoothed out. One way to avoid this 
+		is to pre-process by splitting edges near these features so there are more vertices before calling loop subdivision. This would help better preserve the original 
+		shape of the mesh and the sharpness of certain features. 
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="p6-teapot1.png" width="300px"/>
+				  <figcaption>Original Teapot Mesh</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="p6-teapot2.png" width="300px"/>
+				  <figcaption>After 1 loop subdivision</figcaption>
+				</td>
+				<td style="text-align: center;">
+					<img src="p6-teapot3.png" width="300px"/>
+					<figcaption>After 2 loop subdivisions</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
+		<br><br>
+
+		We also performed several iterations of loop subdivision on <code>cube.dae</code>, as shown below: 
+
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="p6-cube1.png" width="300px"/>
+				  <figcaption>Original cube</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="p6-cube2.png" width="300px"/>
+				  <figcaption>After 1 loop subdivision</figcaption>
+				</td>
+			
+				<td style="text-align: center;">
+					<img src="p6-cube3.png" width="300px"/>
+					<figcaption>After 2 loop subdivisions</figcaption>
+				</td>
+				</tr>
+				<tr>
+				<td style="text-align: center;">
+					<img src="p6-cube4.png" width="300px"/>
+					<figcaption>After 3 loop subdivisions</figcaption>
+				</td>
+				<td style="text-align: center;">
+					<img src="p6-cube5.png" width="300px"/>
+					<figcaption>After 4 loop subdivisions</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
+
+		<br>
+		However, we can see that the cube becomes slightly asymmetric after repeated subdivisions. This is because some of the subdivisions are uneven, 
+		as the original mesh isn't uniform. Not all diagonal edges on the faces are in the same orientation in the original cube mesh, and as we repeatedly call loop 
+		subdivisions,  we can see the asymmetry more clearly. To avoid this, we can pre-process the cube to make it more symmetrical and uniform, for example 
+		by calling splitting the diagonal edge on every face, and then calling loop subdivision after this. The results of doing this are shown below: 
+
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="p6-cube2-1.png" width="300px"/>
+				  <figcaption>Original cube</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="p6-cube2-2.png" width="300px"/>
+				  <figcaption>After 1 loop subdivision</figcaption>
+				</td>
+			
+				<td style="text-align: center;">
+					<img src="p6-cube2-3.png" width="300px"/>
+					<figcaption>After 2 loop subdivisions</figcaption>
+				</td>
+				</tr>
+				<tr>
+				<td style="text-align: center;">
+					<img src="p6-cube2-4.png" width="300px"/>
+					<figcaption>After 3 loop subdivisions</figcaption>
+				</td>
+				<td style="text-align: center;">
+					<img src="p6-cube2-5.png" width="300px"/>
+					<figcaption>After 4 loop subdivisions</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
+
 		</div>
 	</body>
 </html>
