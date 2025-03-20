@@ -36,21 +36,75 @@
 		<br>
 		Link to GitHub repository: <a href="https://github.com/cal-cs184-student/sp25-hw3-haku-fan-club-3">https://github.com/cal-cs184-student/sp25-hw3-haku-fan-club-3</a>
 		
-		<figure>
-			<img src="cornell.png" alt="Cornell Boxes with Bunnies" style="width:70%"/>
-			<figcaption>You can add images with captions!</figcaption>
-		</figure>
+
 
 		<!--
 		We've already added one heading per part, to make your write-up as navigable when grading. Please fit your write-up within these sections!
 		-->
 
 		<h2>Overview</h2>
-		TODO: Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.
+		In this project, we implemented a pathtracer using topics like ray generation, primitive intersection, acceleration structures, global and indirect illumination, and adaptive sampling. 
+		We were able to generate images with varying lighting and learned more about how light interacts with objects and the surrounding environment. 
 
 		<h2>Part 1: Ray Generation and Scene Intersection</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		We began with the ray generation step in the rendering pipeline, which generates camera rays pointing towards the scene, intersecting 
+		the virtual camera sensor. To implement this, we first transformed the image coordinates to camera space by scaling by 2, translating by (-1, -1), adding the -1 z-value dimension, 
+		and finally scaling it by \( (tan (0.5 &times hFov), tan (0.5 &times vFov), 1) \), resulting in new coordinates on a camera sensor centered at (0, 0, 1) with 
+		bottom left corner at \( (-tan (0.5 &times hFov), -tan (0.5 &times vFov), -1) \) and upper right corner at \( (tan (0.5 &times hFov), tan (0.5 &times vFov), -1) \). A visual diagram of 
+		this is shown below.
 
+		Now, we know that the ray origin is (0, 0, 0), and the direction is the point on the camera sensor we just calculated (normalized). We transform both 
+		of these values from camera space into world space and generate the ray with these values, as the final generated ray should be in world space. We also 
+		set <code>min_t</code> and <code>max_t</code> to <code>nclip</code> and <code>fclip</code>, respectively, so that we only consider points within the clipping 
+		plane. Conceptually, what ray generation is doing is determining the what objects appear and the amount of radiance at every point to render in the final image. 
+
+		<br>
+		<figure>
+			<img src="p1-diagram.png" alt="Image space to camera space" style="width:60%"/>
+			<figcaption>Image space to camera space</figcaption>
+		</figure>
+		<br>
+		Then, we implemented with the primitive intersection step in the rendering pipeline. Given a ray and a primitive, such as a triangle or 
+		a sphere, we could use the ray equation \(r(t) = o + td\), where \(o\) is the origin, \(t\) is the time, and \(d\) is the unit direction of 
+		the ray. By solving for the intersection of a sphere with \((o + td - c)^2 - R^2 = 0\), we can find the time that the ray interesects the 
+		shape and use this to find the interesection point (derivation and diagram below). If there is more than one valid intersecion, we choose the one that first occurs. In our implementation, 
+		an intersection is only valid if its between <code>min_t</code> and <code>max_t</code> and updates <code>max_t</code> to be the nearest intersection 
+		to ignore future intersections that are farther away. 
+		<br><br>
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="p1-diagram2.png" width="200px"/>
+				  <figcaption>Ray intersecting sphere</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="p1-intersection.png" width="400px"/>
+				  <figcaption>intersection derivation</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
+		<br><br>
+		
+		A similar method can be used for ray-triangle intersection, but in our implementation, we used the Möller-Trumbore algorithm to avoid having to calculate 
+		the plane equation and to skip to directly finding the time of intersection as well as the barycentric coordinates. The full algorithm and components are shown 
+		below. We first calculated 2 edge vectors \(E_1\) and \(E_2\) pointing from \(P_0\) to the other 2 vertices. We then calculated a vector \(S\) pointing from \(P_0\) to the ray's origin. After this, we calculated vectors \(S_1\) and \(S_2\), which are the cross products of \(D\) and \(E_2\), and \(S\) and \(E_1\) respectively. 
+		Finally, to get the vector \([t, b_1, b_2]\), we divide \([S_2⋅E_2, S_1 ⋅ S, S_2 ⋅ D]\) by \(S_1 ⋅ E_1\). 
+		Even though the algorithm only gives us 2 barycentric coordinates, \(b_1\) and \(b_2\), we can use the property that barycentric coordinates sum to 1 to derive the 
+		last coordinate. We then check the validity of the intersection using the barycentric coordinates (they should all be between 0 and 1 inclusive and sum up to 1) 
+		as well as if the computed time is within the range of <code>min_t</code> and <code>max_t</code>, updating <code>max_t</code> if it is valid. Our final intersection 
+		point is \((1 - b_1 - b_2)P_0 + b_1P_1 + b_2P_2\). 
+
+		<br><br>
+		<figure>
+			<img src="p1-moller-trumbore.png" alt="Möller-Trumbore algorithm" style="width:50%"/>
+			<figcaption>Möller-Trumbore algorithm</figcaption>
+		</figure>
+		<br>
+
+		Images with normal shading for a few small .dae files after implementing ray generation & primitive intersection:
+		<br><br>
 		<div style="display: flex; flex-direction: column; align-items: center;">
 			<table style="width: 100%; text-align: center; border-collapse: collapse;">
 			  <tr>
