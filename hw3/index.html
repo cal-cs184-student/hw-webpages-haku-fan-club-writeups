@@ -206,7 +206,44 @@
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
 		<h2>Part 5: Adaptive Sampling</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		With adaptive sampling, we dynamically determine the number of samples every pixel based on a statistical calculation of how many samples it takes to converge, which avoids unnecessarily using a high number of samples 
+		for pixels that don't require many samples to converge and reduce noise. By focusing more effort on noisy areas that require more samples and avoiding unnecessary extra work on less difficult parts of the images, adaptive sampling helps 
+		improve the overall performance of the rendering. 
+		
+		<br><br>
+		
+		To implement this, as we traced ray samples through a pixel using <code>generate_ray</code>, we decided if the pixel had converged by calculating the value \(I = 1.96 * σ / √n\), where \(n\) is the number of samples, and 
+		\(σ\) is the standard deviation of the samples. In our code, we kept track of 2 variables <code>s1</code> and <code>s2</code>, where <code>s1</code> is the sum of all the samples' illuminance values,
+		and <code>s2</code> is the sum of all the samples' illuminance^2 values. With these values, we can calculate \(σ^2 = 1/(n-1) * (s_2 - s_1^2/n)\) and \(μ = s_1/n\). Using these, we find \(I = 1.96 * σ / √n\), as mentioned earlier. The smaller the value of \(I\) is, the more confident that we can be that the sample has converged. Thus, we set a <code>maxTolerance</code> variable to 0.05 for a 95% confidence interval and check if 
+		\(I ≤ maxTolerance * μ\), where \(μ\) is the mean of the samples. If so, we can be 95% confident that the sample has converged and terminate the sampling for that pixel. Otherwise, we continue sampling. Also, to avoid calculating 
+		the statistical values too frequently, we set a variable <code>samplesPerBatch</code> (default 32 samples), which only checks if a pixel has converged every <code>samplesPerBatch</code> samples. 
+
+
+		<br><br>
+		Scene renderings with their sampling rates (2048 samples per pixel, 1 sample per light, max ray depth of 5):
+
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="p5-bunny.png" width="200px"/>
+				  <figcaption>CBbunny.dae rendering</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="p5-bunny_rate.png" width="200px"/>
+				  <figcaption>CBbunny.dae sampling rates</figcaption>
+				</td>
+				<td style="text-align: center;">
+					<img src="p5-dragon.png" width="200px"/>
+					<figcaption>dragon.dae rendering</figcaption>
+				</td>
+				<td style="text-align: center;">
+					<img src="p5-dragon_rate.png" width="200px"/>
+					<figcaption>dragon.dae sampling rates</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
 
 	
 		</div>
