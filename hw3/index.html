@@ -129,6 +129,27 @@
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
 		<h2>Part 3: Direct Illumination</h2>
+
+		In this part, we implemented direct lighting 2 different ways, through uniform hemispehere sampling and by importance sampling lights. 
+		<ol>
+			<li>Uniform hemisphere sampling: For this method, we randomly sampled directions in the hemisphere around the surface normal. First, we made a coordinate system for a hit point
+				with the surface normal aligned with the Z direction. Then, we used the given <code>hemisphereSampler->get_sample()</code> method to generate <code>num_samples</code> directions and  
+				transformed them to world space, storing them in the <code>w_in_world</code> vector. For each sampled direction, we generated a shadow ray from the hit point with the direction being the transformed sampled direction, <code>w_in_world</code>. For every ray, we set <code>min_t</code> to <code>EPS_F</code>, an epsilon constant 
+				that can be used to avoid numerical precision issues and self-intersection. We then used <code>bvh->intersect</code> to check if the shadow ray intersects a light source. If so, we computed the emission by calling <code>ray_int.bsdf->get_emission()</code>, where 
+				<code>ray_int</code> is where the ray intersects the light. We also evaluated the BSDF function <code>f(w_out, w_in_object)</code> for the incoming and outgoing directions. Finally, we used the reflectance equation, adding <code>(ray_emission * cos_theta * bsdf_sample * 2.0 * M_PI)/(num_samples)</code> to 
+				our total sum of lighting for every sample. <code>cos_theta</code> is the dot product of the normal of the given intersection and <code>w_in_world</code>. We multiply by \(2π\) because the pdf of uniformly sampling 
+				across a hemisphere is \((1 / 2π)\). </li>
+				<br>
+			<li>Importance sampling lights: For this method, instead of randomly sampling in the hemisphere, we focus on sampling from the light sources. For every scene light, we sampled once if its a point light and <code>ns_area_light</code> times otherwise. Then, for each sample, 
+			we used <code>sample_L(hit_p, &w_in_world, &distToLight, &pdf)</code> to sample the light. The method returns the emitted radiance <code>L_i</code>, writes the sampled direction between <code>hit_p</code> and the light source to <code>wi</code>, the distance 
+			between <code>hit_p</code> and the light source in the <code>wi</code> direction to <code>distToLight</code>, and the value of the pdf evaluated at the <code>wi</code> direction to <code>pdf</code>. We then transformed the sampled direction to object space, stored in <code>w_in_object</code>. After this, we 
+			generated a shadow ray with <code>hit_p</code> and <code>w_in_world</code>, setting the <code>min_t</code> and <code>max_t</code> values to <code>EPS_F</code> and <code>distToLight - EPS_F</code> respectively to avoid intersecting with the light itself. Then, we checked if there aren't any other objects between the hit point and the light source by using 
+			the <code>bvh->intersect</code> method. If this was the case, we evaluated the BSDF function <code>f(w_out, w_in_object)</code> and plugged this value into the sum of direct lighting, which is <code>(L_i * cos_theta * bsdf_sample)/(pdf * num_samples)</code>, where 
+			<code>cos_theta</code> is the dot product of the normal of the given intersection and <code>w_in_world</code>. 
+			</li>
+		</ol>
+		<br>
+
 		Some images rendered with both implementations of the direct lighting function:
 		<div style="display: flex; flex-direction: column; align-items: center;">
 			<table style="width: 100%; text-align: center; border-collapse: collapse;">
@@ -174,6 +195,12 @@
 			  </tr>
 			</table>
 		</div>
+
+		<br><br>
+
+		With uniform hemisphere sampling, the sample directions are very random, with a lot of them not even hitting a light source and thus not contributing at all to total direct lighting. This means that many 
+		of the samples are wasted, and there is much more noise and variance in the result compared to light sampling. Especially in scenes with very few light sources, the chance of a random sample direction hitting a light source is extremely low, meaning that uniform sampling is more inefficient, requiring a lot more samples to converge. For light sampling, since we focus specifically on the light sources, calculating total direct lighting 
+		is more deliberate and much faster, which causes the image to render quicker and more accurately and reduces noise in the results. 
 
 		<h2>Part 4: Global Illumination</h2>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
