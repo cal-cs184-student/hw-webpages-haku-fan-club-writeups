@@ -128,6 +128,74 @@
 		<h2>Part 2: Bounding Volume Hierarchy</h2>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
+		Images with normal shading for a few large .dae files made renderable via BVH acceleration:
+		<br><br>
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="p2-maxplanck.png" width="300px"/>
+				  <figcaption>maxplanck.dae</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="p2-CBlucy.png" width="300px"/>
+				  <figcaption>CBlucy.dae</figcaption>
+				</td>
+				<td style="text-align: center;">
+					<img src="p2-dragon.png" width="300px"/>
+					<figcaption>dragon.dae</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
+
+		Comparing rendering times of scenes with moderately complex geometries with and without BVH acceleration:
+		<br><br>
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+					<img src="p2-cow.png" width="300px"/>
+					<figcaption>cow.dae with BVH acceleration; ~0.1128 seconds of rendering time, 5856 primitives</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="p2-cow_slow.png" width="300px"/>
+				  <figcaption>cow.dae without BVH acceleration; ~8.4320 seconds of rendering time, 5856 primitives- </figcaption>
+				</td>
+				<td style="text-align: center;">
+					<img src="p2-beast_slow.png" width="300px"/>
+					<figcaption>beast.dae with BVH acceleration; ~0.0365 seconds of rendering time, 64618 primitives</figcaption>
+				  </td>
+				  <td style="text-align: center;">
+					  <img src="p2-beast.png" width="300px"/>
+					  <figcaption>beast.dae without BVH acceleration; ~172.4064 seconds of rendering time, 64618 primitives</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="p2-CBlucy.png" width="300px"/>
+				  <figcaption>CBlucy.dae with BVH acceleration; ~0.1265 seconds of rendering time, 133796 primitives</figcaption>
+				</td>
+				<td style="text-align: center;">
+					<img src="p2-dragon.png" width="300px"/>
+					<figcaption>CBlucy.dae without BVH acceleration; ~480.4424 seconds of rendering time, 133796 primitives</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
+
+		As we can see above, the images are rendered exactly the same. But the runtimes are drastically different with and without BVH acceleartion. For example, 
+		
+		cow.dae had 5856 primitives, beast.dae: had 64618 primitives, was ~1515 intersections tests per ray,  8.4320 seconds of rendering without BVH, versus 12.03 intersection tests per ray, 0.1128 seconds of rendering, with BVH acceleration.
+		building bvh tree took 0.0138 seconds.
+
+		A much larger Cow.dae had 64618 primitives, was ~25418 intersections tests per ray,  172.4064 seconds of rendering without BVH, versus 3.065 intersection tests per ray, 0.0365 seconds of rendering, with BVH acceleration.
+		building bvh tree took 0.0010 seconds.
+
+		
+		
+		Now an extremely larger image with 133796 primitives. Now from above, though I included it in the "large .dae files made renderable via BVH acceleration", notice it's still possible to be made renderable without the BVH acceleration. However, it takes so long!
+		CBlucy.dae: had 133796 primitives, was ~49348intersections tests per ray,  480.4424 seconds of rendering without BVH, versus 12.69 intersection tests per ray, 0.1265 seconds of rendering, with BVH acceleration.
+		building bvh tree took 0.0378 seconds.
+
 		<h2>Part 3: Direct Illumination</h2>
 
 		In this part, we implemented direct lighting 2 different ways, through uniform hemispehere sampling and by importance sampling lights. 
@@ -203,7 +271,190 @@
 		is more deliberate and much faster, which causes the image to render quicker and more accurately and reduces noise in the results. 
 
 		<h2>Part 4: Global Illumination</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		Our implementation of the indirect lighting function:
+
+		Examples of images rendered with global (direct and indirect) illumination with 1024 samples per pixel:
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="p4-global-blob.png" width="200px"/>
+				  <figcaption>blob.dae rendered with global illumination</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="p4-global-spheres.png" width="200px"/>
+				  <figcaption>CBspheres_lambertian.dae rendered with global illumination</figcaption>
+				</td>
+				<td style="text-align: center;">
+					<img src="p4-direct-bunny.png" width="200px"/>
+					<figcaption> CBbunny.dae rendered with global illumination </figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
+
+
+		Now let's look at the CBbunny.dae scene by comparing views with only direct vs indirect illumination, with 1024 samples per pixel:
+		<br><br>
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="p4-direct-bunny.png" width="200px"/>
+				  <figcaption>CBbunny.dae with direct illumination only</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="p4-indirect-bunny.png" width="200px"/>
+				  <figcaption>CBbunny.dae with indirect illumination only</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
+		<br><br>
+
+		Now, for CBbunny.dae, let's render the mth bounces of light for different values of m from 0-5. We use 1024 samples per pixel.
+		First, let's examine the first row, where isAccumBounces is set to false. As seen from the images before, the difference between 2nd and 3rd...[]
+		Then, let's compare the first row with the second row, where isAccumBounces is set to true. The values of m are the same, and we still use 1024 samples per pixel.
+		Notice here, how [] The difference between accumulated and unaccumulated bounces ... []
+		
+		Renderings of CBbunny.dae with different values of m and isAccumBounces
+		<br><br>
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="p4-global-m0-unaccum.png" width="200px"/>
+				  <figcaption> <code>m = 0</code>, <code>isAccumBounces = false</code> </figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="p4-global-m1-unaccum.png" width="200px"/>
+				  <figcaption> <code>m = 1</code>, <code>isAccumBounces = false</code> </figcaption>
+				</td>
+				<td style="text-align: center;">
+					<img src="p4-global-m2-unaccum.png" width="200px"/>
+					<figcaption> <code>m = 2</code>, <code>isAccumBounces = false</code> </figcaption>
+				  </td>
+				  <td style="text-align: center;">
+					<img src="p4-global-m3-unaccum.png" width="200px"/>
+					<figcaption> <code>m = 3</code>, <code>isAccumBounces = false</code> </figcaption>
+				  </td>
+				  <td style="text-align: center;">
+					<img src="p4-global-m4-unaccum.png" width="200px"/>
+					<figcaption> <code>m = 4</code>, <code>isAccumBounces = false</code> </figcaption>
+				  </td>
+				  <td style="text-align: center;">
+					<img src="p4-global-m5-unaccum.png" width="200px"/>
+					<figcaption> <code>m = 5</code>, <code>isAccumBounces = false</code> </figcaption>
+				  </td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="p4-global-m0-accum.png" width="200px"/>
+				  <figcaption> <code>m = 0</code>, <code>isAccumBounces = true</code> </figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="p4-global-m1-accum.png" width="200px"/>
+				  <figcaption> <code>m = 1</code>, <code>isAccumBounces = true</code> </figcaption>
+				</td>
+				<td style="text-align: center;">
+					<img src="p4-global-m2-accum.png" width="200px"/>
+					<figcaption> <code>m = 2</code>, <code>isAccumBounces = true</code> </figcaption>
+				  </td>
+				  <td style="text-align: center;">
+					<img src="p4-global-m3-accum.png" width="200px"/>
+					<figcaption> <code>m = 3</code>, <code>isAccumBounces = true</code> </figcaption>
+				  </td>
+				  <td style="text-align: center;">
+					<img src="p4-global-m4-accum.png" width="200px"/>
+					<figcaption> <code>m = 4</code>, <code>isAccumBounces = true</code> </figcaption>
+				  </td>
+				  <td style="text-align: center;">
+					<img src="p4-global-m5-accum.png" width="200px"/>
+					<figcaption> <code>m = 5</code>, <code>isAccumBounces = true</code> </figcaption>
+				  </td>
+			  </tr>
+			</table>
+		</div>
+		<br><br>
+
+		Now, let's look at how Russian Roulette renders CBBunny.dae for different values of m, and 1024 samples per pixel:
+		<br><br>
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="p4-m0-rr.png" width="200px"/>
+				  <figcaption> <code>m = 0</code></figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="p4-m1-rr.png" width="200px"/>
+				  <figcaption> <code>m = 1</code></figcaption>
+				</td>
+				<td style="text-align: center;">
+					<img src="p4-m2-rr.png" width="200px"/>
+					<figcaption> <code>m = 2</code> </figcaption>
+				  </td>
+				  <td style="text-align: center;">
+					<img src="p4-m3-rr.png" width="200px"/>
+					<figcaption> <code>m = 3</code> </figcaption>
+				  </td>
+				  <td style="text-align: center;">
+					<img src="p4-m4-rr.png" width="200px"/>
+					<figcaption> <code>m = 4</code></figcaption>
+				  </td>
+				  <td style="text-align: center;">
+					<img src="p4-m5-rr.png" width="200px"/>
+					<figcaption> <code>m = 5</code> </figcaption>
+				  </td>
+				  <td style="text-align: center;">
+					<img src="p4-m100-rr.png" width="200px"/>
+					<figcaption> <code>m = 100</code> </figcaption>
+				  </td>
+			  </tr>	
+			</table>
+		</div>
+		<br><br>
+
+		Finally, let's look at the CBbunny.dae scene, and compare how the render views differ when we use different sample-per-pixel rates and 4 light rays. As can be seen from the images below,
+		as sample-per-pixel rate increases, the images become much less grainy, and the shadows of the whole image become smoother. Though we can always distinguish the bunny and the general scene, a larger sample-per-pixel rate
+		yields smoother, less noisy/grainy and an overall more accurate rendering of our scene.
+
+		<br><br>
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="p4-sample-1.png" width="200px"/>
+				  <figcaption> <code>1 sample per pixel</code></figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="p4-sample-2.png" width="200px"/>
+				  <figcaption> <code>2 samples per pixel</code></figcaption>
+				</td>
+				<td style="text-align: center;">
+					<img src="p4-sample-4.png" width="200px"/>
+					<figcaption> <code>4 samples per pixel</code> </figcaption>
+				  </td>
+				  <td style="text-align: center;">
+					<img src="p4-sample-8.png" width="200px"/>
+					<figcaption> <code>8 samples per pixel</code> </figcaption>
+				  </td>
+				  <td style="text-align: center;">
+					<img src="p4-sample-16.png" width="200px"/>
+					<figcaption> <code>16 samples per pixel</code></figcaption>
+				  </td>
+				  <td style="text-align: center;">
+					<img src="p4-sample-64.png" width="200px"/>
+					<figcaption> <code>64 samples per pixel</code> </figcaption>
+				  </td>
+				  <td style="text-align: center;">
+					<img src="p4-sample-1024.png" width="200px"/>
+					<figcaption> <code>1024 samples per pixel</code> </figcaption>
+				  </td>
+			  </tr>	
+			</table>
+		</div>
+		<br><br>
 
 		<h2>Part 5: Adaptive Sampling</h2>
 		With adaptive sampling, we dynamically determine the number of samples every pixel based on a statistical calculation of how many samples it takes to converge, which avoids unnecessarily using a high number of samples 
