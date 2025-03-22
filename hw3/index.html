@@ -127,11 +127,9 @@
 		
 		<h2>Part 2: Bounding Volume Hierarchy</h2>
 
-		<h3>Describing our BVH construction algorithm + heuristic</h3>
-
 		<p>Here is our BVH construction algorithm: </p>
 		<p> 
-			The starter code expands a starting bounding box, <code>bbox</code>, to fit all the primitives that are given as input. If this number is less than or equal to <code>max_leaf_size</code>, then all we need to do is create a leaf node. So we build a <code>BVHNode</p>code> with its bounding box set to <code>bbox</code>, set its pointers to left and right children to null pointers and return this node!
+			The starter code expands a starting bounding box, <code>bbox</code>, to fit all the primitives that are given as input. If this number is less than or equal to <code>max_leaf_size</code>, then all we need to do is create a leaf node. So we build a <code>BVHNode</pcode> with its bounding box set to <code>bbox</code>, set its pointers to left and right children to null pointers and return this node!
 			Otherwise, this node is not a leaf node because we have too many primitives. We’ll still set this node’s bounding box to <code>bbox</code>. Then, we find which axis <code>bbox</code> takes up the most space in, in other words, the axis in which its extent is the greatest. Choosing the axis with the greatest extent makes sense because we expect the objects inside to be more spread out within, which generally leads to balanced branches, which is good for runtime.
 			To actually split the <code>bbox</code> on this axis, we chose to use the midpoint heuristic. The midpoint heuristic is good because in practice, we expect roughly half of the primitives to lie on each side of the midpoint (if there is some approximately uniform distribution). 
 			We use the midpoint to split the groups into a left and a right partition. The left partition consists of primitives with bounding box centroids less than the midpoint on the earlier found axis. Since the given list isn’t necessarily sorted by our chosen axis, to actually partition out the primitives, we simply iterate through the given list of primitives and modify the list in-place. We swap any primitive at our current partition index, and increment the index until we’ve gone through the entire list. The result is that all the primitives in the left partition are located in the original list, indexed from <code>[start, partition)</code>, while the right partition is located at <code>[partition, end)</code>.
@@ -160,7 +158,7 @@
 			</table>
 		</div>
 
-		
+		<br><br>
 		<br><br>
 		Comparing rendering times of scenes with moderately complex geometries with and without BVH acceleration:
 		<div style="display: flex; flex-direction: column; align-items: center;">
@@ -168,31 +166,31 @@
 			  <tr>
 				<td style="text-align: center;">
 					<img src="p2-cow.png" width="300px"/>
-					<figcaption>cow.dae with BVH acceleration; ~0.1128 seconds of rendering time, 5856 primitives</figcaption>
+					<figcaption>cow.dae with BVH acceleration; ~0.1128 seconds of rendering time</figcaption>
 				</td>
 				<td style="text-align: center;">
 				  <img src="p2-cow_slow.png" width="300px"/>
-				  <figcaption>cow.dae without BVH acceleration; ~8.4320 seconds of rendering time, 5856 primitives- </figcaption>
+				  <figcaption>cow.dae without BVH acceleration; ~8.4320 seconds of rendering time- </figcaption>
 				</td>
 			</tr>
 					<tr>
 				<td style="text-align: center;">
 					<img src="p2-beast_slow.png" width="300px"/>
-					<figcaption>beast.dae with BVH acceleration; ~0.0365 seconds of rendering time, 64618 primitives</figcaption>
+					<figcaption>beast.dae with BVH acceleration; ~0.0365 seconds of rendering time</figcaption>
 				  </td>
 				  <td style="text-align: center;">
 					  <img src="p2-beast.png" width="300px"/>
-					  <figcaption>beast.dae without BVH acceleration; ~172.4064 seconds of rendering time, 64618 primitives</figcaption>
+					  <figcaption>beast.dae without BVH acceleration; ~172.4064 seconds of rendering time</figcaption>
 				</td>
 			</tr>
 			<tr>
 				<td style="text-align: center;">
 				  <img src="p2-CBlucy.png" width="300px"/>
-				  <figcaption>CBlucy.dae with BVH acceleration; ~0.1265 seconds of rendering time, 133796 primitives</figcaption>
+				  <figcaption>CBlucy.dae with BVH acceleration; ~0.1265 seconds of rendering time</figcaption>
 				</td>
 				<td style="text-align: center;">
 					<img src="p2-CBlucy_slow.png" width="300px"/>
-					<figcaption>CBlucy.dae without BVH acceleration; ~480.4424 seconds of rendering time, 133796 primitives</figcaption>
+					<figcaption>CBlucy.dae without BVH acceleration; ~480.4424 seconds of rendering time</figcaption>
 				</td>
 			  </tr>
 			</table>
@@ -237,15 +235,15 @@
 			  <tr>
 				<td style="text-align: center;">
 				  <img src="p3-bunny.png" width="300px"/>
-				  <figcaption>CBbunny.dae</figcaption>
+				  <figcaption><codea>CBbunny.dae</codea></figcaption>
 				</td>
 				<td style="text-align: center;">
 				  <img src="p3-dragon.png" width="225px"/>
-				  <figcaption>dragon.dae</figcaption>
+				  <figcaption><code>dragon.dae</code></figcaption>
 				</td>
 				<td style="text-align: center;">
 					<img src="p3-walle.png" width="300px"/>
-					<figcaption>wall-e.dae</figcaption>
+					<figcaption><code>wall-e.dae</code></figcaption>
 				</td>
 			  </tr>
 			</table>
@@ -284,30 +282,47 @@
 		is more deliberate and much faster, which causes the image to render quicker and more accurately and reduces noise in the results. 
 
 		<h2>Part 4: Global Illumination</h2>
-		Our implementation of the indirect lighting function:
 
+		<p>Here is how we implemented our indirect lighting function:</p>
+		<p>We implemented the function <code> at_least_one_bounce_radiance </code>, which recursively calls upon itself to simulate multiple light bounces. First we check if the depth of our given ray is at 0. If so, there can be no more calls and we just return 0, for there will be no illumination to be returned.  Else, we know there’s still at least a bounce to be made. Moving on, our next step was similar to the direct lighting functions, and we made a coordinate system for a hit point with the normal aligned with the Z direction. If it happened that the ray’s depth was 1, or <code> isAccumBounces = true </code>, we know that we should compute the direct lighting at this bounce, and we set the outgoing illumination, <code> L_out</code> to the output of <code> one_bounce_radiance </code>. This is because we are either at the very last bounce, thus we want the one-bounce radiance, or because we want this quantity since we’re accumulating radiance from all bounces anyways.
+		</p>
+		<p>
+		If it happens that the ray’s depth is greater than 1, then we must keep recursing. Here is where Russian Roulette gets introduced. We continue recursing with a probability equal to <code> continuation_prob = 0.65 </code>, which we defined based on advice from the homework spec. However, if the current ray’s depth is also equal to the maximum ray depth, we know we must continue on with the function so the ray can take the first bounce no matter what the probabilistic outcome from earlier was. 
+		We then sample the current amount of light based on our value of <code> w_in_world</code>, which we feed into our isect’s BSDF’s <code> sample_f </code> function. We generate a sample ray based on the world coordinates and hit point, making sure to set the new ray’s depth by the current ray’s depth - 1, as we’ve already used up a bounce. We now find ourselves with two different outcomes, but only if we weren’t stopped by Russian Roulette from earlier, and if our BVH actually intersects this sample_ray (since we need a valid intersection to continue).
+	</p>
+		<ol>
+		<li>If we allow for accumulated bounces, or this sample ray has depth 0, then we’ll compute the sampled amount of light multiplied by <code> at_least_one_bounce_radiance</code> recursively called on <code> sample_ray</code>. We’ll have to “normalize” this quantity by multiplying by the dot product between the normal vector and <code> w_in_world</code> to account for light hitting the surface at an angle, divide by pdf, and multiply by the continuation_probability in order to keep this estimator unbiased. We then add this quantity to <code>L_out</code>, because this is the illumination from the consequent bounces that we want to accumulate together.</li>
+		<li> Else, we don’t allow for accumulated bounces. In this case, instead of adding the above quantity to <code>L_out</code>, we directly set <code>L_out</code> to that quantity. This is because we want the radiance solely from the last bounce. </li>
+		</ol>
+		<p>
+		Finally, we return whatever <code>L_out</code>, the outgoing illuminance is. This is how much light is coming from <code>at_least_one_bounce_radiance</code> from the given ray and intersection.
+
+		</p>
+
+
+		<br><br>
 		Examples of images rendered with global (direct and indirect) illumination with 1024 samples per pixel:
 		<div style="display: flex; flex-direction: column; align-items: center;">
 			<table style="width: 100%; text-align: center; border-collapse: collapse;">
 			  <tr>
 				<td style="text-align: center;">
 				  <img src="p4-global-blob.png" width="200px"/>
-				  <figcaption>blob.dae rendered with global illumination</figcaption>
+				  <figcaption> <code>blob.dae</code> rendered with global illumination</figcaption>
 				</td>
 				<td style="text-align: center;">
 				  <img src="p4-global-spheres.png" width="200px"/>
-				  <figcaption>CBspheres_lambertian.dae rendered with global illumination</figcaption>
+				  <figcaption><code>CBspheres_lambertian.dae</code> rendered with global illumination</figcaption>
 				</td>
 				<td style="text-align: center;">
 					<img src="p4-direct-bunny.png" width="200px"/>
-					<figcaption> CBbunny.dae rendered with global illumination </figcaption>
+					<figcaption>  <code>CBbunny.dae</code> rendered with global illumination </figcaption>
 				</td>
 			  </tr>
 			</table>
 		</div>
 
-
-		Now let's look at the CBbunny.dae scene by comparing views with only direct vs indirect illumination, with 1024 samples per pixel for each image.
+		<br><br>
+		Now let's look at the  <code>CBbunny.dae</code> scene by comparing views with only direct vs indirect illumination, with 1024 samples per pixel for each image.
 		Notice how one key difference is that in the indirectly illuminated image, the scene light is black. This is because the only light in this scene on any given surface must
 		have first originated via another surface via bounces. Additionally, this image is much softer.
 
@@ -320,21 +335,21 @@
 			  <tr>
 				<td style="text-align: center;">
 				  <img src="p4-direct-bunny.png" width="200px"/>
-				  <figcaption>CBbunny.dae with direct illumination only</figcaption>
+				  <figcaption> <code>CBbunny.dae</code>with direct illumination only</figcaption>
 				</td>
 				<td style="text-align: center;">
 				  <img src="p4-indirect-bunny.png" width="200px"/>
-				  <figcaption>CBbunny.dae with indirect illumination only</figcaption>
+				  <figcaption> <code>CBbunny.dae</code> with indirect illumination only</figcaption>
 				</td>
 			  </tr>
 			</table>
 		</div>
 		<br><br>
 
-		Now, for CBbunny.dae, let's render images for different values of m from 0-5. We use 1024 samples per pixel.
-		First, let's examine the first row, where isAccumBounces is set to false. As m increases, our images get dimmer, as we examine latter bounces of light. The light source appears completely black (except when m=0).
-		Comparing the cases when <code>m=2</code> to <code>m = 3</code>, we can see that m=3 is much more dimmer. Notice that the lights that are on the wall the bunny is in front of, have the effect of to decreasing the overall shadows between the ceilings in the walls, and this result can be
-		observed when isAccumBounces is true, and <code>m = 3</code>, where we observe softer shadows near the ceiling in contrast to lower m values. The overall effect of the individual 2nd and 3rd bounces when combined with previous bounces of light work together to create
+		Now, for  <code>CBbunny.dae</code>, let's render images for different values of m from 0-5. We use 1024 samples per pixel.
+		First, let's examine the first row, where <code>isAccumBounces</code> is set to false. As m increases, our images get dimmer, as we examine latter bounces of light. The light source appears completely black (except when <code>m=0</code>).
+		Comparing the cases when <code>m=2</code> to <code>m = 3</code>, we can see that <code>m=3</code> is much more dimmer. Notice that the lights that are on the wall the bunny is in front of, have the effect of to decreasing the overall shadows between the ceilings in the walls, and this result can be
+		observed when <code>isAccumBounces</code> is true, and <code>m = 3</code>, where we observe softer shadows near the ceiling in contrast to lower m values. The overall effect of the individual 2nd and 3rd bounces when combined with previous bounces of light work together to create
 		a much more realistic image, one that rasterization, which relies on optimizations and other poorer approximations, cannot produce, at least as realistically.
 		
 		<br><br>
@@ -395,8 +410,9 @@
 			</table>
 		</div>
 		<br><br>
+		<br><br>
 
-		Now, let's look at how our renders for CBBunny.dae look when Russian Roulette (with a continuation probability of 0.65) is added. We try different values of m, and 1024 samples per pixel:
+		Now, let's look at how our renders for  <code>CBbunny.dae</code> look when Russian Roulette (with a continuation probability of 0.65) is added. We try different values of m, and 1024 samples per pixel:
 		<br><br>
 		<div style="display: flex; flex-direction: column; align-items: center;">
 			<table style="width: 100%; text-align: center; border-collapse: collapse;">
@@ -433,8 +449,9 @@
 			</table>
 		</div>
 		<br><br>
+		<br><br>
 
-		Finally, let's look at the CBbunny.dae scene, and compare how the render views differ when we use different sample-per-pixel rates and 4 light rays. As can be seen from the images below,
+		Finally, let's look at the <code>CBbunny.dae scene</code>, and compare how the render views differ when we use different sample-per-pixel rates and 4 light rays. As can be seen from the images below,
 		as sample-per-pixel rate increases, the images become much less grainy, and the shadows of the whole image become smoother. Though we can always distinguish the bunny and the general scene, a larger sample-per-pixel rate
 		yields smoother, less noisy/grainy and an overall more accurate rendering of our scene.
 
