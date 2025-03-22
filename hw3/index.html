@@ -128,15 +128,16 @@
 		<h2>Part 2: Bounding Volume Hierarchy</h2>
 
 		<p>Here is our BVH construction algorithm: </p>
-		<p> 
-			The starter code expands a starting bounding box, <code>bbox</code>, to fit all the primitives that are given as input. If this number is less than or equal to <code>max_leaf_size</code>, then all we need to do is create a leaf node. So we build a <code>BVHNode</code> with its bounding box set to <code>bbox</code>, set its pointers to left and right children to null pointers and return this node!
-			Otherwise, this node is not a leaf node because we have too many primitives. We’ll still set this node’s bounding box to <code>bbox</code>. Then, we find which axis <code>bbox</code> takes up the most space in, in other words, the axis in which its extent is the greatest. Choosing the axis with the greatest extent makes sense because we expect the objects inside to be more spread out within, which generally leads to balanced branches, which is good for runtime.
-			To actually split the <code>bbox</code> on this axis, we chose to use the midpoint heuristic. The midpoint heuristic is good because in practice, we expect roughly half of the primitives to lie on each side of the midpoint (if there is some approximately uniform distribution). 
-			We use the midpoint to split the groups into a left and a right partition. The left partition consists of primitives with bounding box centroids less than the midpoint on the earlier found axis. Since the given list isn’t necessarily sorted by our chosen axis, to actually partition out the primitives, we simply iterate through the given list of primitives and modify the list in-place. We swap any primitive at our current partition index, and increment the index until we’ve gone through the entire list. The result is that all the primitives in the left partition are located in the original list, indexed from <code>[start, partition)</code>, while the right partition is located at <code>[partition, end)</code>.
-			However, one fault of the median heuristic point is that it is entirely possible that all primitives lie on one side of the midpoint. And in this case, this means nothing has been partitioned! When we make further recursive calls, it’ll therefore be on the same list of primitives, with the same longest axis, and we end up stuck in an infinite loop.
-			Thus our solution is to check for this condition, and if it’s true, force partition point to be the middle primitive (middle meaning index-wise). The downside of this heuristic is that it doesn’t take into account the positions of the primitives’ bounding boxes, but at least we are guaranteed to prevent the infinite loop from occuring!
-		</p>
-
+		<p> The starter code expands a starting bounding box, <code>bbox</code>, to fit all the primitives that are given as input. If this number is less than or equal to <code>max_leaf_size</code>, then all we need to do is create a leaf node. So we build a <code>BVHNode</code> with its bounding box set to <code>bbox</code>, set its pointers to left and right children to null pointers and return this node!</p>
+			
+		<p>Otherwise, this node is not a leaf node because we have too many primitives. We’ll still set this node’s bounding box to <code>bbox</code>. Then, we find which axis <code>bbox</code> takes up the most space in, in other words, the axis in which its extent is the greatest. Choosing the axis with the greatest extent makes sense because we expect the objects inside to be more spread out within, which generally leads to balanced branches, which is good for runtime.</p>
+		<p>To actually split the <code>bbox</code> on this axis, we chose to use the midpoint heuristic. The midpoint heuristic is good because in practice, we expect roughly half of the primitives to lie on each side of the midpoint (if there is some approximately uniform distribution). </p>
+		<p>We use the midpoint to split the groups into a left and a right partition. The left partition consists of primitives with bounding box centroids less than the midpoint on the earlier found axis. Since the given list isn’t necessarily sorted by our chosen axis, to actually partition out the primitives, we simply iterate through the given list of primitives and modify the list in-place. We swap any primitive at our current partition index, and increment the index until we’ve gone through the entire list. The result is that all the primitives in the left partition are located in the original list, indexed from <code>[start, partition)</code>, while the right partition is located at <code>[partition, end)</code>.</p>
+		<p>However, one fault of the median heuristic point is that it is entirely possible that all primitives lie on one side of the midpoint. And in this case, this means nothing has been partitioned! When we make further recursive calls, it’ll therefore be on the same list of primitives, with the same longest axis, and we end up stuck in an infinite loop.</p>
+		<p>Thus our solution is to check for this condition, and if it’s true, force partition point to be the middle primitive (middle meaning index-wise). The downside of this heuristic is that it doesn’t take into account the positions of the primitives’ bounding boxes, but at least we are guaranteed to prevent the infinite loop from occuring!</p>
+		<p>Now that we are sure to have partitions that are well-formed and not empty, we can recursively call the BVH algorithm on these smaller partitions. From earlier, we set a current node, which is the root of this tree, to have a bounding box set to the given <code>bbox</code>. The left pointer of our node is also a BVH tree built on the left partitioned primitives, which we can recursively call <code>construct_bvh(start, partition, max_leaf_size)</code> to obtain. Same for the right pointer, which is a BVH built on the right partitioned primitives that we’ll also call <code>construct_bvh(partition, end, max_leaf_size)</<code> for. We can trust that the recursion works, and we safely return the root node!</p>
+		
+		<br><br>
 		<br><br>
 		Images with normal shading for a few large .dae files made renderable via BVH acceleration:
 		<div style="display: flex; flex-direction: column; align-items: center;">
@@ -170,7 +171,7 @@
 				</td>
 				<td style="text-align: center;">
 				  <img src="p2-cow_slow.png" width="300px"/>
-				  <figcaption>cow.dae without BVH acceleration; ~8.4320 seconds of rendering time- </figcaption>
+				  <figcaption>cow.dae without BVH acceleration; ~8.4320 seconds of rendering time </figcaption>
 				</td>
 			</tr>
 					<tr>
@@ -197,14 +198,14 @@
 		</div>
 
 		<p>
-			As expected, with or without BVH acceleration, we get the same rendering of the images. However, there is a significant difference in performance. We can take an example of a relatively simpler scene, <code> cow.dae </code> with 5,856 primitives. With BVH acceleration, it took 0.1128 seconds to render, compared to 8.4320 seconds without. 
+			As expected, with or without BVH acceleration, we get the same rendering of the images. However, there is a significant difference in performance. We can take an example of a relatively simpler scene, <code> cow.dae</code> with 5,856 primitives. With BVH acceleration, it took 0.1128 seconds to render, compared to 8.4320 seconds without. 
 		</p>
 		
 		<p>
-			Another example is <code> beast.dae </code>, which is a more complex scene with 64,618 primitives. Rendering time was 0.0365 seconds with BVH acceleration (even less than it did for <code> cow.dae </code>!), and 172.4064 seconds without. 
+			Another example is <code> beast.dae </code>, which is a more complex scene with 64,618 primitives. Rendering time was 0.0365 seconds with BVH acceleration (even less than it did for <code> cow.dae</code>!), and 172.4064 seconds without. 
 		</p>
 		<p>
-			A much larger scene was <code> CBlucy.dae </code> with 133.796 primtitives. Though it technically can be rendered with BVH acceleration, the time it takes is far longer, from 0.1265 seconds to render with BVH accleration, and 480.4 seconds without. In each of these examples, it took a very short amount of time to also do the work of building the BVH tree (respectively for the 3 <code> .dae </code> files, it was 0.0138, 0.0010 0.0378 seconds). Clearly from all of these examples, it can be seen how efficient BVH acceleration can be when rendering scenes with moderately complex, and very complex geometries. But in addition from just looking at time saved, we can also examine the boost in another important metric. For example, for <code> CBlucy.dae </code>, BVH acceleration cut the average number of intersection tests per ray from about 49,348 to 12.69, which is an incredible improvement.
+			A much larger scene was <code> CBlucy.dae </code> with 133.796 primtitives. Though it technically can be rendered with BVH acceleration, the time it takes is far longer, from 0.1265 seconds to render with BVH accleration, and 480.4 seconds without. In each of these examples, it took a very short amount of time to also do the work of building the BVH tree (respectively for the 3 <code> .dae </code> files, it was 0.0138, 0.0010, and 0.0378 seconds). Clearly from all of these examples, it can be seen how efficient BVH acceleration can be when rendering scenes with moderately complex, and very complex geometries. But in addition from just looking at time saved, we can also examine the boost in another important metric. For example, for <code> CBlucy.dae</code>, BVH acceleration cut the average number of intersection tests per ray from about 49,348 to around 12.69, which is an incredible improvement.
 		</p>
 
 		<h2>Part 3: Direct Illumination</h2>
@@ -322,6 +323,8 @@
 		</div>
 
 		<br><br>
+		<br><br>
+		<br><br>
 		Now let's look at the  <code>CBbunny.dae</code> scene by comparing views with only direct vs indirect illumination, with 1024 samples per pixel for each image.
 		Notice how one key difference is that in the indirectly illuminated image, the scene light is black. This is because the only light in this scene on any given surface must
 		have first originated via another surface via bounces. Additionally, this image is much softer.
@@ -335,7 +338,7 @@
 			  <tr>
 				<td style="text-align: center;">
 				  <img src="p4-direct-bunny.png" width="200px"/>
-				  <figcaption> <code>CBbunny.dae</code>with direct illumination only</figcaption>
+				  <figcaption> <code>CBbunny.dae</code> with direct illumination only</figcaption>
 				</td>
 				<td style="text-align: center;">
 				  <img src="p4-indirect-bunny.png" width="200px"/>
@@ -344,6 +347,9 @@
 			  </tr>
 			</table>
 		</div>
+
+		<br><br>
+		<br><br>
 		<br><br>
 
 		Now, for  <code>CBbunny.dae</code>, let's render images for different values of m from 0-5. We use 1024 samples per pixel.
@@ -436,10 +442,6 @@
 				  <td style="text-align: center;">
 					<img src="p4-m4-rr.png" width="200px"/>
 					<figcaption> <code>m = 4</code></figcaption>
-				  </td>
-				  <td style="text-align: center;">
-					<img src="p4-m5-rr.png" width="200px"/>
-					<figcaption> <code>m = 5</code> </figcaption>
 				  </td>
 				  <td style="text-align: center;">
 					<img src="p4-m100-rr.png" width="200px"/>
