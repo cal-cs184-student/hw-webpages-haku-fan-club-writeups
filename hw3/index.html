@@ -128,8 +128,8 @@
 		<h2>Part 2: Bounding Volume Hierarchy</h2>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
-		Images with normal shading for a few large .dae files made renderable via BVH acceleration:
 		<br><br>
+		Images with normal shading for a few large .dae files made renderable via BVH acceleration:
 		<div style="display: flex; flex-direction: column; align-items: center;">
 			<table style="width: 100%; text-align: center; border-collapse: collapse;">
 			  <tr>
@@ -149,8 +149,9 @@
 			</table>
 		</div>
 
-		Comparing rendering times of scenes with moderately complex geometries with and without BVH acceleration:
+		
 		<br><br>
+		Comparing rendering times of scenes with moderately complex geometries with and without BVH acceleration:
 		<div style="display: flex; flex-direction: column; align-items: center;">
 			<table style="width: 100%; text-align: center; border-collapse: collapse;">
 			  <tr>
@@ -162,6 +163,8 @@
 				  <img src="p2-cow_slow.png" width="300px"/>
 				  <figcaption>cow.dae without BVH acceleration; ~8.4320 seconds of rendering time, 5856 primitives- </figcaption>
 				</td>
+			</tr>
+					<tr>
 				<td style="text-align: center;">
 					<img src="p2-beast_slow.png" width="300px"/>
 					<figcaption>beast.dae with BVH acceleration; ~0.0365 seconds of rendering time, 64618 primitives</figcaption>
@@ -170,6 +173,8 @@
 					  <img src="p2-beast.png" width="300px"/>
 					  <figcaption>beast.dae without BVH acceleration; ~172.4064 seconds of rendering time, 64618 primitives</figcaption>
 				</td>
+			</tr>
+			<tr>
 				<td style="text-align: center;">
 				  <img src="p2-CBlucy.png" width="300px"/>
 				  <figcaption>CBlucy.dae with BVH acceleration; ~0.1265 seconds of rendering time, 133796 primitives</figcaption>
@@ -294,7 +299,13 @@
 		</div>
 
 
-		Now let's look at the CBbunny.dae scene by comparing views with only direct vs indirect illumination, with 1024 samples per pixel:
+		Now let's look at the CBbunny.dae scene by comparing views with only direct vs indirect illumination, with 1024 samples per pixel for each image.
+		Notice how one key difference is that in the indirectly illuminated image, the scene light is black. This is because the only light in this scene on any given surface must
+		have first originated via another surface via bounces. Additionally, this image is much softer.
+
+		The directly illuminated image has much more stronger shadows, because every part of the image that does not get directly hit by the scene light is black. Thus in contrast, we observe
+		a black ceiling, as well as the bunny's underside and shadow being much more darker and contrasting.
+
 		<br><br>
 		<div style="display: flex; flex-direction: column; align-items: center;">
 			<table style="width: 100%; text-align: center; border-collapse: collapse;">
@@ -312,12 +323,12 @@
 		</div>
 		<br><br>
 
-		Now, for CBbunny.dae, let's render the mth bounces of light for different values of m from 0-5. We use 1024 samples per pixel.
-		First, let's examine the first row, where isAccumBounces is set to false. As seen from the images before, the difference between 2nd and 3rd...[]
-		Then, let's compare the first row with the second row, where isAccumBounces is set to true. The values of m are the same, and we still use 1024 samples per pixel.
-		Notice here, how [] The difference between accumulated and unaccumulated bounces ... []
+		Now, for CBbunny.dae, let's render images for different values of m from 0-5. We use 1024 samples per pixel.
+		First, let's examine the first row, where isAccumBounces is set to false. As m increases, our images get dimmer, as we examine latter bounces of light. The light source appears completely black (except when m=0).
+		Comparing the cases when <code>m=2</code> to <code>m = 3</code>, we can see that m=3 is much more dimmer. Notice that the lights that are on the wall the bunny is in front of, have the effect of to decreasing the overall shadows between the ceilings in the walls, and this result can be
+		observed when isAccumBounces is true, and <code>m = 3</code>, where we observe softer shadows near the ceiling in contrast to lower m values. The overall effect of the individual 2nd and 3rd bounces when combined with previous bounces of light work together to create
+		a much more realistic image, one that rasterization, which relies on optimizations and other poorer approximations, cannot produce, at least as realistically.
 		
-		Renderings of CBbunny.dae with different values of m and isAccumBounces
 		<br><br>
 		<div style="display: flex; flex-direction: column; align-items: center;">
 			<table style="width: 100%; text-align: center; border-collapse: collapse;">
@@ -377,7 +388,7 @@
 		</div>
 		<br><br>
 
-		Now, let's look at how Russian Roulette renders CBBunny.dae for different values of m, and 1024 samples per pixel:
+		Now, let's look at how our renders for CBBunny.dae look when Russian Roulette (with a continuation probability of 0.65) is added. We try different values of m, and 1024 samples per pixel:
 		<br><br>
 		<div style="display: flex; flex-direction: column; align-items: center;">
 			<table style="width: 100%; text-align: center; border-collapse: collapse;">
@@ -439,6 +450,8 @@
 					<img src="p4-sample-8.png" width="200px"/>
 					<figcaption> <code>8 samples per pixel</code> </figcaption>
 				  </td>
+				  </tr>
+				  <tr>
 				  <td style="text-align: center;">
 					<img src="p4-sample-16.png" width="200px"/>
 					<figcaption> <code>16 samples per pixel</code></figcaption>
