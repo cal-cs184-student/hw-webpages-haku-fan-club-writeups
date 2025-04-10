@@ -37,12 +37,6 @@
 		<br>
 
 		Link to GitHub repository: <a href="https://github.com/cal-cs184-student/sp25-hw4-haku-fan-club-4">https://github.com/cal-cs184-student/sp25-hw4-haku-fan-club-4</a>
-
-		<figure>
-			<img src="clothsim.png" alt="Cloth draped over sphere" style="width:70%"/>
-			<figcaption>You can add images with captions!</figcaption>
-		</figure>
-
 		<!--
 		We've already added one heading per part, to make your write-up as navigable when grading. Please fit your write-up within these sections!
 		-->
@@ -72,6 +66,9 @@
 			</table>
 		</div>
 
+		<br><br>
+		<br><br>
+
 		<p>Here is what the wiring frame looks like with these modifications on spring constraints:</p>
 		<div style="display: flex; flex-direction: column; align-items: center;">
 			<table style="width: 100%; text-align: center; border-collapse: collapse;">
@@ -91,32 +88,8 @@
 			  </tr>
 			</table>
 		</div>
-
-		<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
-		<div style="display: flex; flex-direction: column; align-items: center;">
-			<table style="width: 100%; text-align: center; border-collapse: collapse;">
-			  <tr>
-				<td style="text-align: center;">
-				  <img src="clothsim.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-				<td style="text-align: center;">
-				  <img src="clothsim.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-			  </tr>
-			  <tr>
-				<td style="text-align: center;">
-				  <img src="clothsim.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-				<td style="text-align: center;">
-				  <img src="clothsim.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-			  </tr>
-			</table>
-		</div>
+		
+		<br><br>
 
 		<h2>Part 2: Simulation via numerical integration</h2>
 		In this part, we integrated the physical equations of motion to apply the forces on the cloth's point masses, analyzing how different variables 
@@ -217,6 +190,7 @@
 
 
 		<h2>Part 3: Handling collisions with other objects</h2>
+		<br><br>
 
 		<p>Here, were our main steps in how we implemented handling collisions:</p>
 		<ol>
@@ -237,7 +211,8 @@
 				</p>
 			</li>
 		</ol>
-
+		<br><br>
+		<br><br>
 
 		<p>Screenshots of shaded cloth from <code>scene/sphere.json</code> in its final resting state on the sphere with different values of <code>ks</code>:</p>
 		<P>When actually playing each animation of dropping the cloth, as we decrease the value of <code>ks</code>, the cloth seems to drape over the sphere much more like cloth, as in it softly drapes.
@@ -264,7 +239,8 @@
 			  </tr>
 			</table>
 		</div>
-
+		<br><br>
+		<br><br>
 		<p>Now a screenshot of our shaded cloth lying peacefully at rest on the plane:</p>
 		<div style="display: flex; flex-direction: column; align-items: center;">
 			<table style="width: 100%; text-align: center; border-collapse: collapse;">
@@ -302,9 +278,26 @@
 		</div>
 
 		<h2>Part 5: Shaders</h2>
-		<p>TODO here is what a shader program is</p>
-
-		<p>TODO here is what blinn shading model is:</p>
+		<p>The Blinn-Phong shading model is composed of three different types of lighting that when altogether put together, seem to model an object quite nicely/realistically depending on how you adjust the components. Here are each of the 3 components:
+		</p>
+		<ol>
+			<li> Ambient Lighting
+				<p>This is constant and indirect lighting that can be thought of as the background lighting, and ensures that all surfaces, regardless of whether or not there is a light source illuminating them, will be visible to some degree, proportional to I_a, which is the intensity of the ambient light.
+				</p>
+			</li>
+			<li> Diffuse Lighting
+				<p>This is the light that is scattered when hitting a surface, and importantly scattered uniformly in all directions, producing a matte appearance. Due to Lambert’s cosine law, the light received per unit area by the surface depends on the angle between the light direction and the surface normal, and in other words, proportional to their dot product (unless it’s negative, because we can’t have negative light so we set it to 0 in that case). The intensity of the light has an inverse-square falloff as distance increases. Thus diffuse lighting is also proportional to (1/r^2).
+				</p>
+			</li>
+			<li> Specular Lighting
+				<p>This is the light corresponding to the shiny highlights that we see on glossy surfaces. The intensity of the light depends on where you view it from, and it’s brightest when the viewer is looking in the angle where the light will undergo perfect reflection. We approximate this as the half vector that is near the normal vector to the surface, which is very close to the perfect reflection angle. Thus, specular lighting is proportional to the dot product between the normal vector and this half vector (once again, unless it’s negative, then in which case the intensity is 0). Specular lighting also has an inverse squared falloff, so it’s also proportional to 1/r^2. Also, we tend to see the dot product raised to an exponent p, which is a parameter controlling exactly how shiny the highlights are.
+				</p>
+			</li>
+		</ol>
+		<p>When put together, we give each of the lighting types a coefficient to control how much we want that lighting to contribute to our overall shading model and sum them together. The resultant model is Blinn-Phong!
+		</p>
+		<br><br>
+		<br><br>
 		<p>Here is how our Blinn-Phong shading model looks on <code>scene/sphere.json</code>:</p>
 		<div style="display: flex; flex-direction: column; align-items: center;">
 			<table style="width: 100%; text-align: center; border-collapse: collapse;">
@@ -330,7 +323,8 @@
 			  </tr>
 			</table>
 		</div>
-
+		<br><br>
+		<br><br>
 		<p>Here are some different angles of how our texture mapping shader looks like with our own custom texture!</p>
 		<div style="display: flex; flex-direction: column; align-items: center;">
 			<table style="width: 100%; text-align: center; border-collapse: collapse;">
@@ -351,9 +345,21 @@
 			</table>
 		</div>
 
+		<br><br>
+		<br><br>
+		<p>
+			Here is how bump and displacement mapping looked like for <code>scene/sphere.json</code>, using the texture from <code>texture_3.png</code>:
+		</p>
+		<p>
+			Comparing the bump mapping and the displacement mapping on the sphere itself, we can clearly see that both actually change the sphere’s appearance (in this case, it appears as if the sphere has adopted the brick inlay pattern). Taking a close look at the outline of the sphere in bump mapping, it appears to be perfectly spherical. But taking a close look at the displacement mapped sphere reveals that the outline itself is bumpy, which makes the sphere actually appear non-spherical, with slight deviations on its surface as well! The geometry of the sphere has actually in fact changed in the case. However, the “inside” of the sphere is shaded extremely similarly in both cases (as we’d expect, since they use Blinn-Phong).
+		</p>
+		<p>	
+			Now looking at the cloth draped on the sphere, we observe similar differences. For example, in displacement mapping, the cloth has additional deformities, and in both cases the cloth itself has the texture mapped onto it. Also, notice that we can see the deformity in the sphere affects how the cloth is draped, as the top of cloth is more bumpy and not perfectly spherical in the displacement mapped image.
+		</p>
+		<p>
+			In essence, though both mappings change how the surfaces are rendered via texture data, displacement mapping actually shifts relative positions and changes the surface geometry of its model, whereas bump mapping does not affect the shape itself, but affects shading to kind of replicate that effect .
+		</p>
 
-		<p>Here is how bump and displacement mapping looked like for <code>scene/sphere.json</code>, using the texture from <code>texture_3.png</code>:</p>
-		<p>TODO C....dadsfdaj comparing ...</p>
 		<div style="display: flex; flex-direction: column; align-items: center;">
 			<table style="width: 100%; text-align: center; border-collapse: collapse;">
 			  <tr>
@@ -379,8 +385,13 @@
 			</table>
 		</div>
 
-		<p>TODO C....dadsfdaj comparing ...</p>
-		<p>TODO C....dadsfdaj comparing EVEN MORE ...</p>
+		<br><br>
+		<p>
+			When we increase resolution, notice how the images rendered by bump resolution do not change (at least by any noticeable amount) in both the cloth and sphere images.
+		</p>
+		<p>			
+			However, we can see a significant difference in the sphere rendered by displacement resolution. With higher resolution, we see the outline resembling more of a sphere, though both will be non-perfectly spherical. This makes sense. In higher resolutions, simply more vertices are used. So when they are perturbed, the changes aren’t as drastic since there’s just more of them. But in the case of the cloth, it seemed that there wasn’t a significant difference, perhaps due to the spring system of the cloth. Anyhow, when resolution increased, the image appeared to be smoother, though the changes in the surface of the cloth weren’t as easy to observe compared to just the sphere itself.
+		</p>
 		<div style="display: flex; flex-direction: column; align-items: center;">
 			<table style="width: 100%; text-align: center; border-collapse: collapse;">
 			  <tr>
@@ -396,11 +407,11 @@
 			  <tr>
 				<td style="text-align: center;">
 				  <img src="q5cii-16.png" width="400px"/>
-				  <figcaption>displacement mapping with parameters <code>-o 16 a -16</code> on the cloth</figcaption>
+				  <figcaption>bump mapping with parameters <code>-o 16 a -16</code> on the cloth</figcaption>
 				</td>
 				<td style="text-align: center;">
 				  <img src="q5cii-128.png" width="400px"/>
-				  <figcaption>displacement mapping with parameters <code>-o 128 a -128</code> on the cloth</figcaption>
+				  <figcaption>bump mapping with parameters <code>-o 128 a -128</code> on the cloth</figcaption>
 				</td>
 			  </tr>
 			  <tr>
@@ -416,18 +427,19 @@
 			  <tr>
 				<td style="text-align: center;">
 				  <img src="q5civ-16.png" width="400px"/>
-				  <figcaption>bump mapping with parameters <code>-o 16 a -16</code> on the cloth</figcaption>
+				  <figcaption>displacement mapping with parameters <code>-o 16 a -16</code> on the cloth</figcaption>
 				</td>
 				<td style="text-align: center;">
 				  <img src="q5civ-128.png" width="400px"/>
-				  <figcaption>bump mapping with parameters <code>-o 128 a -128</code> on the cloth</figcaption>
+				  <figcaption>displacement mapping with parameters <code>-o 128 a -128</code> on the cloth</figcaption>
 				</td>
 			  </tr>
 			</table>
 		</div>
 		
 		
-
+		<br><br>
+		<br><br>
 		<p>Here is how our mirror shader looks:</p>
 		<div style="display: flex; flex-direction: column; align-items: center;">
 			<table style="width: 100%; text-align: center; border-collapse: collapse;">
