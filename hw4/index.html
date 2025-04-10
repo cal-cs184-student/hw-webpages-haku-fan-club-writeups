@@ -255,7 +255,24 @@
 		</div>
 		<br><br>
 		<h2>Part 4: Handling self-collisions</h2>
+		In this part, we implemented self-collisions using spatial hashing. First, in <code>Cloth::hash_position</code>, we hashed any given 3D point mass position into a unique float identifier, 
+		which represents a specific 3D volume. To implement this, we began by partitioning the space into 3D boxes with dimensions \(w * h * t\), setting <code>w = 3 * width / num_width_points</code>, 
+		<code>h = 3 * width / num_height_points</code>, and <code>t = max(w, h)</code>. The constant 3 acts as a magic number to help improve the hashing algorithm's accuracy. Then, using the <code>fmod</code> 
+		function, we truncated the x, y, and z values to the lower-bound of the its specific box. For example, <code>float x = pos.x - fmod(pos.x, w)</code>, and we did the same for the y and z values accordingly (with h and t).
+		We then converted the box indices to integers to get values <code>x_int, y_int, z_int</code> and finally combined these values into a float by weighting them with magic numbers (1, 100, and 10000) to generate a unique hash.
+		<br><br>
+		Then, in <code>Cloth::build_spatial_map</code>, we looped over every point mass and called <code>hash_position</code> to generate their unique hashes and stored these values in a map. The spatial map maps the hash 
+		value (float) to a corresponding vector of point masses. 
+		<br><br>
+		Finally, we also implemented <code>Cloth::self_collide</code>, which takes in a point mass, calculates its unique hash value, and looks this up in the hash table. This returns a vector of all the possible collision candidates. Then, 
+		we looped through all the potential candidates (excluding the given point mass itself), checking if their distance from the given point mass is within \(2 * thickness\). If so, we calculated a correction vector <code>diff.unit() * (2*thickness - diff.norm())</code>, where <code>Vector3D diff = (pm.position - pm2->position)</code>. We added 
+		up all the correction vectors and averaged them, then scaled them down by <code>simulation_steps</code> to improve the accuracy. We added this final averaged and scaled correction vector to the given point mass position. To make sure self-collisions are 
+		properly accounted for in the simulation, we also called this method <code>self_collide</code> on every point mass in <code>Cloth::simulate</code>.
+		<br><br>
+		Thus, with these steps, we've implemented self-collisions, and as the cloth falls, it now folds on itself instead of clipping through itself. 
+		<br><br>
 		Here are screenshots of how the cloth behaves as it falls at 3 different timestamps:
+		<br><br>
 		<div style="display: flex; flex-direction: column; align-items: center;">
 			<table style="width: 100%; text-align: center; border-collapse: collapse;">
 			  <tr>
@@ -275,6 +292,51 @@
 			</table>
 		</div>
 		<br><br>
+		As the density increases, the mass of the cloth increases as well, causing the cloth to fall quicker and with many more folds throughout. Also, the cloth bounces around much more 
+		and the folds are more piled up with higher densities during self collisions. Below are images of the cloth with a high density and low density midfall:
+		<br><br> 
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="p4-density-small.png" width="400px"/>
+				  <figcaption>density = 2 g/cm^2</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="p4-density-large.png" width="400px"/>
+				  <figcaption>density = 50 g/cm^2</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
+		<br><br>
+		As the spring constant \(k_s\) increases, the cloth becomes more stiff as it falls, leading to less stretching and wrinkles. The folds are also more larger and more crisp as the spring constant 
+		increases. Below are images of the cloth with a high and low spring constant at 2 different positions during the fall:
+		<br><br>
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="p4-ks-small.png" width="400px"/>
+				  <figcaption>\(k_s = 100\)</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="p4-ks-large.png" width="400px"/>
+				  <figcaption>\(k_s = 5000\)</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="p4-ks-small2.png" width="400px"/>
+				  <figcaption>\(k_s = 100\)</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="p4-ks-large2.png" width="400px"/>
+				  <figcaption>\(k_s = 5000\)</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
 		<h2>Part 5: Shaders</h2>
 		<p>The Blinn-Phong shading model is composed of three different types of lighting that when altogether put together, seem to model an object quite nicely/realistically depending on how you adjust the components. Here are each of the 3 components:
 		</p>
