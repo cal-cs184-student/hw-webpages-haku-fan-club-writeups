@@ -51,7 +51,46 @@
 		Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.
 
 		<h2>Part 1: Masses and springs</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		<p>Here are some different viewing angles of the cloth wireframe, so you can clearly see the structure of our point masses and springs in <code>scene/pinned2.json</code></p>
+
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="q1ai.png" width="400px"/>
+				  <figcaption>Bird's eye view of the grid (from the top).</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="q1aii.png" width="400px"/>
+				  <figcaption>View of grid from the side.</figcaption>
+				</td>
+				<td style="text-align: center;">
+					<img src="q1aiii.png" width="400px"/>
+					<figcaption>View of grid from the "bottom".</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
+
+		<p>Here is what the wiring frame looks like with these modifications on spring constraints:</p>
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="q1bi.png" width="400px"/>
+				  <figcaption>Wireframe without shearing constraints</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="q1bii.png" width="400px"/>
+				  <figcaption>Wireframe with only the shearing constraints</figcaption>
+				</td>
+				<td style="text-align: center;">
+					<img src="q1biii.png" width="400px"/>
+					<figcaption>Wireframe with all constraints</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
 
 		<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
 		<div style="display: flex; flex-direction: column; align-items: center;">
@@ -83,13 +122,214 @@
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
 		<h2>Part 3: Handling collisions with other objects</h2>
+
+		<p>Here, were our main steps in how we implemented handling collisions:</p>
+		<ol>
+			<li>First, check if we actually need to handle the collision. 
+				<p>
+					In other words, if the point mass was actually inside the plane or sphere. For the plane, we check this based on if the point has crossed the plane. Mathematically we compute the signed distances (which we can obtain from the dot product between the vector from any point from the plane to the point mass, and the plane’s normal) of the last position and current position of the point. Different signs indicate the point being on different sides of the plane, thus the point is “inside” the plane if the signs of the two signed distances are different. To check if the point is inside the sphere, we just take the difference vector between the point’s position and the origin of the sphere. If the length of this distance vector is less then the sphere’s radius, the point must be inside the sphere!
+				</p>
+			</li>
+			<li>Second, if there is a collision, then we need to compute what change in position to the point is necessary to resolve the collision.
+				<p> We resolve it by bumping up the “point mass” such that it lies on the surface of the plane/sphere. We take this as our “correction vector”.
+					For the sphere, the correction vector is the difference vector between the point’s position and the sphere’s origin. The problem is that the difference vector is too small, thus the point is inside the sphere. All we have to do is scale this difference vector until its length is that of the sphere’s radius. So we can obtain the correction vector by taking the difference vector (which points outward from the origin), and scale it by the sphere’s radius.
+					For the plane, we first calculate the tangent point, which is the intersection of where the point mass would have hit the plane if we extended it in a straight line. We do this using a parametric line equation, solving for a scalar t that occurs when the point is exactly on the plane. This t can be used to find the actual intersection point, which is the tangent point. The correction vector points from the point’s last position to this tangent point. We then add a small surface offset to the correction vector, because we don’t actually want the point’s new position to end up on the plane surface, but instead just above it. However, this small offset needs to be added along the unit normal of the plane, and also depends on what side the point came from. Thus if the signed distance of the last position was positive, we add the surface offset to the correction vector in the direction of the unit normal because the point comes from above the plane. Likewise, subtracting the surface offset if the signed distance was negative.
+				</p>
+			</li>
+			<li> Finally, we adjust the point mass’s position using the correction vector from earlier.  However, we must also account for friction.
+				<p>
+					So all this step is, is updating the point’s new position, to the point’s last position plus the correction vector scaled by (1-f), where f is the friction coefficient, since we want to scale it down by friction.
+				</p>
+			</li>
+		</ol>
+
+
+		<p>Screenshots of shaded cloth from <code>scene/sphere.json</code> in its final resting state on the sphere with different values of <code>ks</code>:</p>
+		<P>When actually playing each animation of dropping the cloth, as we decrease the value of <code>ks</code>, the cloth seems to drape over the sphere much more like cloth, as in it softly drapes.
+			However, as we increase <code>ks</code>, the cloth becomes much more rigid, and tends to maintain its shape regardless of the sphere. This can be seen in the screenshots below, where for example, when 
+			<code>ks = 50000</code>, there is a noticeable difference in how it seems angled compared to <code>ks = 500</code>, which follows better the shape of the sphere it drapes around. When <code>ks = 5000</code>, 
+			we witness its form being somewhere in between these two, with elements of both rigidity and droopiness.
+		</P>
+		
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="q3ai.png" width="400px"/>
+				  <figcaption><code>ks = 5000</code> (default) </figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="q3aii.png" width="400px"/>
+				  <figcaption><code>ks = 500</code></figcaption>
+				</td>
+				<td style="text-align: center;">
+					<img src="q3aiii.png" width="400px"/>
+					<figcaption><code>ks = 50000</code></figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
+
+		<p>Now a screenshot of our shaded cloth lying peacefully at rest on the plane:</p>
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="q3b.png" width="400px"/>
+				  <figcaption>our cloth from <code>scene/plane.json</code>(default) </figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
+
+
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
 		<h2>Part 4: Handling self-collisions</h2>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
 		<h2>Part 5: Shaders</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		<p>TODO here is what a shader program is</p>
+
+		<p>TODO here is what blinn shading model is:</p>
+		<p>Here is how our Blinn-Phong shading model looks on <code>scene/sphere.json</code>:</p>
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="q5ai.png" width="400px"/>
+				  <figcaption>only shading the ambient component</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="q5aii.png" width="400px"/>
+				  <figcaption>only shading the diffuse component</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="q5aiii.png" width="400px"/>
+				  <figcaption>only shading the specular component</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="q5aiv.png" width="400px"/>
+				  <figcaption>using the entire Blinn-Phong model</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
+
+		<p>Here are some different angles of how our texture mapping shader looks like with our own custom texture!</p>
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="q5bi.png" width="400px"/>
+				  <figcaption><code> our custom texture on the cloth (bird's eye view) </figcaption>
+				</td>
+				<td style="text-align: center;">
+					<img src="q5bii.png" width="400px"/>
+					<figcaption> our custom texture before being dropped </figcaption>
+				</td>
+				<td style="text-align: center;">
+					<img src="q5biii.png" width="400px"/>
+					<figcaption> another angle of our custom texture </figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
+
+
+		<p>Here is how bump and displacement mapping looked like for <code>scene/sphere.json</code>, using the texture from <code>texture_3.png</code>:</p>
+		<p>TODO C....dadsfdaj comparing ...</p>
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="q5ci.png" width="400px"/>
+				  <figcaption>bump mapping on the sphere</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="q5cii.png" width="400px"/>
+				  <figcaption>bump mapping on the cloth</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="q5ciii.png" width="400px"/>
+				  <figcaption>displacement mapping on the sphere</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="q5civ.png" width="400px"/>
+				  <figcaption>displacement mapping on the cloth</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
+
+		<p>TODO C....dadsfdaj comparing ...</p>
+		<p>TODO C....dadsfdaj comparing EVEN MORE ...</p>
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="q5ci-16.png" width="400px"/>
+				  <figcaption>bump mapping with parameters <code>-o 16 a -16</code> on the sphere</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="q5ci-128.png" width="400px"/>
+				  <figcaption>bump mapping with parameters <code>-o 128 a -128</code> on the sphere</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="q5cii-16.png" width="400px"/>
+				  <figcaption>displacement mapping with parameters <code>-o 16 a -16</code> on the cloth</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="q5cii-128.png" width="400px"/>
+				  <figcaption>displacement mapping with parameters <code>-o 128 a -128</code> on the cloth</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="q5ciii-16.png" width="400px"/>
+				  <figcaption>displacement mapping with parameters <code>-o 16 a -16</code> on the sphere</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="q5ciii-128.png" width="400px"/>
+				  <figcaption>displacement mapping with parameters <code>-o 128 a -128</code> on the sphere</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="q5civ-16.png" width="400px"/>
+				  <figcaption>bump mapping with parameters <code>-o 16 a -16</code> on the cloth</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="q5civ-128.png" width="400px"/>
+				  <figcaption>bump mapping with parameters <code>-o 128 a -128</code> on the cloth</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
+		
+		
+
+		<p>Here is how our mirror shader looks:</p>
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="q5di.png" width="400px"/>
+				  <figcaption>Mirror shader just on the sphere</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="q5dii.png" width="400px"/>
+				  <figcaption>Mirror shader on the cloth on the sphere</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
 
 		<h2>(Optional) Part 6: Extra Credit - Additional cloth simulation features!</h2>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
