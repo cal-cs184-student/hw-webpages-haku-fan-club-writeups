@@ -338,6 +338,16 @@
 			</table>
 		</div>
 		<h2>Part 5: Shaders</h2>
+		<p>A shader program is a program that runs on a GPU and computes rendering operations to manipulate the lighting, colors, textures, and 
+			other aspects of a scene's appearance. Shader programs are often used for visual effects, and on a lower level they take in certain inputs and
+			 output a 4D vector. 2 specific shader types are vertex and fragment shaders, which work together to create lighting and material effects. </p>
+
+			<p>As the name states, vertex shaders process and transform vertices, applying geometric transformations such as translations, rotations, scaling, etc. 
+				After calculations, the vertex shaders write the final positions of the vertex to the fragment shader. Then, after this and rasterization, 
+			the fragment shader takes in the fragments produced. The role of the fragment shader is to use this data to determine the final output color of each fragment by applying textures, lighting models, etc. This 
+			helps create material effects and lighting. Thus, these 2 important shaders work together sequentially in order to create realistic models with visual effects and lighting.
+		 </p>
+
 		<p>The Blinn-Phong shading model is composed of three different types of lighting that when altogether put together, seem to model an object quite nicely/realistically depending on how you adjust the components. Here are each of the 3 components:
 		</p>
 		<ol>
